@@ -3,380 +3,441 @@ import splice from '../src';
 
 describe('Fast Splice', () => {
   let array;
+  let comparisonArray;
   beforeEach(() => {
     array = [1, 2, 3, 4, 5];
+    comparisonArray = [1, 2, 3, 4, 5];
   });
 
-  function nativeSplice(array, ...args) {
+  function nativeSplice(arr, ...args) {
     if (args.length === 3) {
       args.push(...args.pop());
     }
-    return array.splice.apply(array, args);
-  }
-
-  function test(message, cb) {
-    it(message, () => cb(splice));
-    it(message + ' (native)', () => cb(nativeSplice));
-  }
-  test.only = function only(message, cb) {
-    it.only(message, () => cb(splice));
+    return arr.splice.apply(arr, args);
   }
 
   describe('with no arguments', () => {
-    test('errors', (splice) => {
+    it('errors', () => {
       expect(() => {
         splice();
+      }).to.throw(TypeError);
+      expect(() => {
+        nativeSplice();
       }).to.throw(TypeError);
     });
   });
 
   describe('with only array argument', () => {
-    test('leaves array untouched', (splice) => {
-        splice(array);
-        expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+    it('leaves array untouched', () => {
+      splice(array);
+      nativeSplice(comparisonArray);
+      expect(array).to.deep.equal(comparisonArray);
     });
 
-    test('returns empty array', (splice) => {
-        expect(splice(array)).to.deep.equal([]);
+    it('returns empty array', () => {
+      expect(splice(array))
+        .to.deep.equal(nativeSplice(comparisonArray));
     });
   });
 
   describe('with start index', () => {
-    test('removes everything after index', (splice) => {
+    it('removes everything after index', () => {
       splice(array, 3);
-      expect(array).to.deep.equal([1, 2, 3]);
+      nativeSplice(comparisonArray, 3);
+      expect(array).to.deep.equal(comparisonArray);
     });
 
-    test('returns removed elements', (splice) => {
-      expect(splice(array, 3)).to.deep.equal([4, 5]);
+    it('returns removed elements', () => {
+      expect(splice(array, 3))
+        .to.deep.equal(nativeSplice(comparisonArray, 3));
     });
 
     describe('with 0 start index', () => {
-      test('removes everything after index', (splice) => {
+      it('removes everything after index', () => {
         splice(array, 0);
-        expect(array).to.deep.equal([]);
+        nativeSplice(comparisonArray, 0);
+        expect(array).to.deep.equal(comparisonArray);
       });
 
-      test('returns removed elements', (splice) => {
-        expect(splice(array, 0)).to.deep.equal([1, 2, 3, 4, 5]);
+      it('returns removed elements', () => {
+        expect(splice(array, 0))
+          .to.deep.equal(nativeSplice(comparisonArray, 0));
       });
     });
 
     describe('with high start index', () => {
-      test('removes nothing', (splice) => {
+      it('removes nothing', () => {
         splice(array, array.length + 1);
-        expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+        nativeSplice(comparisonArray, comparisonArray.length + 1);
+        expect(array).to.deep.equal(comparisonArray);
       });
 
-      test('returns empty array', (splice) => {
-        expect(splice(array, array.length + 1)).to.deep.equal([]);
+      it('returns empty array', () => {
+        expect(splice(array, array.length + 1))
+          .to.deep.equal(nativeSplice(comparisonArray, comparisonArray.length + 1));
       });
     });
 
     describe('with negative start index', () => {
-      test('removes count from the end', (splice) => {
+      it('removes count from the end', () => {
         splice(array, -1);
-        expect(array).to.deep.equal([1, 2, 3, 4]);
+        nativeSplice(comparisonArray, -1);
+        expect(array).to.deep.equal(comparisonArray);
       });
 
-      test('returns removed elements', (splice) => {
-        expect(splice(array, -1)).to.deep.equal([5]);
+      it('returns removed elements', () => {
+        expect(splice(array, -1))
+          .to.deep.equal(nativeSplice(comparisonArray, -1));
       });
     });
 
     describe('with very negative start index', () => {
-      test('removes everything', (splice) => {
+      it('removes everything', () => {
         splice(array, -1 - array.length);
-        expect(array).to.deep.equal([]);
+        nativeSplice(comparisonArray, -1 - comparisonArray.length);
+        expect(array).to.deep.equal(comparisonArray);
       });
 
-      test('returns everything', (splice) => {
-        expect(splice(array, -1 - array.length)).to.deep.equal([1, 2, 3, 4, 5]);
+      it('returns everything', () => {
+        expect(splice(array, -1 - array.length))
+          .to.deep.equal(nativeSplice(comparisonArray, -1 - comparisonArray.length));
       });
     });
 
     describe('with odd start index', () => {
-      test('removes everything', (splice) => {
+      it('removes everything', () => {
         splice(array, null);
-        expect(array).to.deep.equal([]);
+        nativeSplice(comparisonArray, null);
+        expect(array).to.deep.equal(comparisonArray);
       });
 
-      test('returns everything', (splice) => {
-        expect(splice(array, null)).to.deep.equal([1, 2, 3, 4, 5]);
+      it('returns everything', () => {
+        expect(splice(array, null))
+          .to.deep.equal(nativeSplice(comparisonArray, null));
       });
     });
   });
 
   describe('with delete count', () => {
-    test('removes count elements', (splice) => {
+    it('removes count elements', () => {
       splice(array, 0, 2);
-      expect(array).to.deep.equal([3, 4, 5]);
+      nativeSplice(comparisonArray, 0, 2);
+      expect(array).to.deep.equal(comparisonArray);
     });
 
-    test('returns removed elements', (splice) => {
-      expect(splice(array, 0, 2)).to.deep.equal([1, 2]);
+    it('returns removed elements', () => {
+      expect(splice(array, 0, 2))
+        .to.deep.equal(nativeSplice(comparisonArray, 0, 2));
     });
 
     describe('with 0 delete count', () => {
-      test('removes nothing', (splice) => {
+      it('removes nothing', () => {
         splice(array, 3, 0);
-        expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+        nativeSplice(comparisonArray, 3, 0);
+        expect(array).to.deep.equal(comparisonArray);
       });
 
-      test('returns empty array', (splice) => {
-        expect(splice(array, 3, 0)).to.deep.equal([]);
+      it('returns empty array', () => {
+        expect(splice(array, 3, 0))
+          .to.deep.equal(nativeSplice(comparisonArray, 3, 0));
       });
 
       describe('with 0 start index', () => {
-        test('removes nothing', (splice) => {
+        it('removes nothing', () => {
           splice(array, 0, 0);
-          expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+          nativeSplice(comparisonArray, 0, 0);
+          expect(array).to.deep.equal(comparisonArray);
         });
 
-        test('returns empty array', (splice) => {
-          expect(splice(array, 0, 0)).to.deep.equal([]);
+        it('returns empty array', () => {
+          expect(splice(array, 0, 0))
+            .to.deep.equal(nativeSplice(comparisonArray, 0, 0));
         });
       });
 
       describe('with high start index', () => {
-        test('removes nothing', (splice) => {
+        it('removes nothing', () => {
           splice(array, array.length + 1, 0);
-          expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+          nativeSplice(comparisonArray, comparisonArray.length + 1, 0);
+          expect(array).to.deep.equal(comparisonArray);
         });
 
-        test('returns empty array', (splice) => {
-          expect(splice(array, array.length + 1, 0)).to.deep.equal([]);
+        it('returns empty array', () => {
+          expect(splice(array, array.length + 1, 0))
+            .to.deep.equal(nativeSplice(comparisonArray, comparisonArray.length + 1, 0));
         });
       });
 
       describe('with negative start index', () => {
-        test('removes nothing', (splice) => {
+        it('removes nothing', () => {
           splice(array, -1, 0);
-          expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+          nativeSplice(comparisonArray, -1, 0);
+          expect(array).to.deep.equal(comparisonArray);
         });
 
-        test('returns empty array', (splice) => {
-          expect(splice(array, -1, 0)).to.deep.equal([]);
+        it('returns empty array', () => {
+          expect(splice(array, -1, 0))
+            .to.deep.equal(nativeSplice(comparisonArray, -1, 0));
         });
       });
 
       describe('with very negative start index', () => {
-        test('removes nothing', (splice) => {
+        it('removes nothing', () => {
           splice(array, -1 - array.length, 0);
-          expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+          nativeSplice(comparisonArray, -1 - comparisonArray.length, 0);
+          expect(array).to.deep.equal(comparisonArray);
         });
 
-        test('returns empty array', (splice) => {
-          expect(splice(array, -1 - array.length, 0)).to.deep.equal([]);
+        it('returns empty array', () => {
+          expect(splice(array, -1 - array.length, 0))
+            .to.deep.equal(nativeSplice(comparisonArray, -1 - comparisonArray.length, 0));
         });
       });
 
       describe('with odd start index', () => {
-        test('removes nothing', (splice) => {
+        it('removes nothing', () => {
           splice(array, null, 0);
-          expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+          nativeSplice(comparisonArray, null, 0);
+          expect(array).to.deep.equal(comparisonArray);
         });
 
-        test('returns empty array', (splice) => {
-          expect(splice(array, null, 0)).to.deep.equal([]);
+        it('returns empty array', () => {
+          expect(splice(array, null, 0))
+            .to.deep.equal(nativeSplice(comparisonArray, null, 0));
         });
       });
     });
 
     describe('with high delete count', () => {
-      test('removes everything after start index', (splice) => {
+      it('removes everything after start index', () => {
         splice(array, 3, array.length);
-        expect(array).to.deep.equal([1, 2, 3]);
+        nativeSplice(comparisonArray, 3, comparisonArray.length);
+        expect(array).to.deep.equal(comparisonArray);
       });
 
-      test('returns removed elements', (splice) => {
-        expect(splice(array, 3, array.length)).to.deep.equal([4, 5]);
+      it('returns removed elements', () => {
+        expect(splice(array, 3, array.length))
+          .to.deep.equal(nativeSplice(comparisonArray, 3, comparisonArray.length));
       });
 
       describe('with 0 start index', () => {
-        test('removes everything', (splice) => {
+        it('removes everything', () => {
           splice(array, 0, array.length);
-          expect(array).to.deep.equal([]);
+          nativeSplice(comparisonArray, 0, comparisonArray.length);
+          expect(array).to.deep.equal(comparisonArray);
         });
 
-        test('returns everything', (splice) => {
-          expect(splice(array, 0, array.length)).to.deep.equal([1, 2, 3, 4, 5]);
+        it('returns everything', () => {
+          expect(splice(array, 0, array.length))
+            .to.deep.equal(nativeSplice(comparisonArray, 0, comparisonArray.length));
         });
       });
 
       describe('with high start index', () => {
-        test('removes nothing', (splice) => {
+        it('removes nothing', () => {
           splice(array, array.length + 1, array.length);
-          expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+          nativeSplice(comparisonArray, comparisonArray.length + 1, comparisonArray.length);
+          expect(array).to.deep.equal(comparisonArray);
         });
 
-        test('returns empty array', (splice) => {
-          expect(splice(array, array.length + 1, array.length)).to.deep.equal([]);
+        it('returns empty array', () => {
+          expect(splice(array, array.length + 1, array.length))
+            .to.deep.equal(nativeSplice(comparisonArray, comparisonArray.length + 1, comparisonArray.length));
         });
       });
 
       describe('with negative start index', () => {
-        test('removes everything after count from end', (splice) => {
+        it('removes everything after count from end', () => {
           splice(array, -1, array.length);
-          expect(array).to.deep.equal([1, 2, 3, 4]);
+          nativeSplice(comparisonArray, -1, comparisonArray.length);
+          expect(array).to.deep.equal(comparisonArray);
         });
 
-        test('returns removed elements', (splice) => {
-          expect(splice(array, -1, array.length)).to.deep.equal([5]);
+        it('returns removed elements', () => {
+          expect(splice(array, -1, array.length))
+            .to.deep.equal(nativeSplice(comparisonArray, -1, comparisonArray.length));
         });
       });
 
       describe('with very negative start index', () => {
-        test('removes everything', (splice) => {
+        it('removes everything', () => {
           splice(array, -1 - array.length, array.length);
-          expect(array).to.deep.equal([]);
+          nativeSplice(comparisonArray, -1 - comparisonArray.length, comparisonArray.length);
+          expect(array).to.deep.equal(comparisonArray);
         });
 
-        test('returns everything', (splice) => {
-          expect(splice(array, -1 - array.length, array.length)).to.deep.equal([1, 2, 3, 4, 5]);
+        it('returns everything', () => {
+          expect(splice(array, -1 - array.length, array.length))
+            .to.deep.equal(nativeSplice(comparisonArray, -1 - comparisonArray.length, comparisonArray.length));
         });
       });
 
       describe('with odd start index', () => {
-        test('removes everything', (splice) => {
+        it('removes everything', () => {
           splice(array, null, array.length);
-          expect(array).to.deep.equal([]);
+          nativeSplice(comparisonArray, null, comparisonArray.length);
+          expect(array).to.deep.equal(comparisonArray);
         });
 
-        test('returns everything', (splice) => {
-          expect(splice(array, null, array.length)).to.deep.equal([1, 2, 3, 4, 5]);
+        it('returns everything', () => {
+          expect(splice(array, null, array.length))
+            .to.deep.equal(nativeSplice(comparisonArray, null, comparisonArray.length));
         });
       });
     });
 
     describe('with negative delete count', () => {
-      test('removes nothing', (splice) => {
+      it('removes nothing', () => {
         splice(array, 3, -1);
-        expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+        nativeSplice(comparisonArray, 3, -1);
+        expect(array).to.deep.equal(comparisonArray);
       });
 
-      test('returns empty array', (splice) => {
-        expect(splice(array, 3, -1)).to.deep.equal([]);
+      it('returns empty array', () => {
+        expect(splice(array, 3, -1))
+          .to.deep.equal(nativeSplice(comparisonArray, 3, -1));
       });
 
       describe('with 0 start index', () => {
-        test('removes nothing', (splice) => {
+        it('removes nothing', () => {
           splice(array, 0, -1);
-          expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+          nativeSplice(comparisonArray, 0, -1);
+          expect(array).to.deep.equal(comparisonArray);
         });
 
-        test('returns empty array', (splice) => {
-          expect(splice(array, 0, -1)).to.deep.equal([]);
+        it('returns empty array', () => {
+          expect(splice(array, 0, -1))
+            .to.deep.equal(nativeSplice(comparisonArray, 0, -1));
         });
       });
 
       describe('with high start index', () => {
-        test('removes nothing', (splice) => {
+        it('removes nothing', () => {
           splice(array, array.length + 1, -1);
-          expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+          nativeSplice(comparisonArray, comparisonArray.length + 1, -1);
+          expect(array).to.deep.equal(comparisonArray);
         });
 
-        test('returns empty array', (splice) => {
-          expect(splice(array, array.length + 1, -1)).to.deep.equal([]);
+        it('returns empty array', () => {
+          expect(splice(array, array.length + 1, -1))
+            .to.deep.equal(nativeSplice(comparisonArray, comparisonArray.length + 1, -1));
         });
       });
 
       describe('with negative start index', () => {
-        test('removes nothing', (splice) => {
+        it('removes nothing', () => {
           splice(array, -1, -1);
-          expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+          nativeSplice(comparisonArray, -1, -1);
+          expect(array).to.deep.equal(comparisonArray);
         });
 
-        test('returns empty array', (splice) => {
-          expect(splice(array, -1, -1)).to.deep.equal([]);
+        it('returns empty array', () => {
+          expect(splice(array, -1, -1))
+            .to.deep.equal(nativeSplice(comparisonArray, -1, -1));
         });
       });
 
       describe('with very negative start index', () => {
-        test('removes nothing', (splice) => {
+        it('removes nothing', () => {
           splice(array, -1 - array.length, -1);
-          expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+          nativeSplice(comparisonArray, -1 - comparisonArray.length, -1);
+          expect(array).to.deep.equal(comparisonArray);
         });
 
-        test('returns empty array', (splice) => {
-          expect(splice(array, -1 - array.length, -1)).to.deep.equal([]);
+        it('returns empty array', () => {
+          expect(splice(array, -1 - array.length, -1))
+            .to.deep.equal(nativeSplice(comparisonArray, -1 - comparisonArray.length, -1));
         });
       });
 
       describe('with odd start index', () => {
-        test('removes nothing', (splice) => {
+        it('removes nothing', () => {
           splice(array, null, -1);
-          expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+          nativeSplice(comparisonArray, null, -1);
+          expect(array).to.deep.equal(comparisonArray);
         });
 
-        test('returns empty array', (splice) => {
-          expect(splice(array, null, -1)).to.deep.equal([]);
+        it('returns empty array', () => {
+          expect(splice(array, null, -1))
+            .to.deep.equal(nativeSplice(comparisonArray, null, -1));
         });
       });
     });
 
     describe('with odd delete count', () => {
-      test('removes nothing', (splice) => {
+      it('removes nothing', () => {
         splice(array, 3, null);
-        expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+        nativeSplice(comparisonArray, 3, null);
+        expect(array).to.deep.equal(comparisonArray);
       });
 
-      test('returns empty array', (splice) => {
-        expect(splice(array, 3, null)).to.deep.equal([]);
+      it('returns empty array', () => {
+        expect(splice(array, 3, null))
+          .to.deep.equal(nativeSplice(comparisonArray, 3, null));
       });
 
       describe('with 0 start index', () => {
-        test('removes nothing', (splice) => {
+        it('removes nothing', () => {
           splice(array, 0, null);
-          expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+          nativeSplice(comparisonArray, 0, null);
+          expect(array).to.deep.equal(comparisonArray);
         });
 
-        test('returns empty array', (splice) => {
-          expect(splice(array, 0, null)).to.deep.equal([]);
+        it('returns empty array', () => {
+          expect(splice(array, 0, null))
+            .to.deep.equal(nativeSplice(comparisonArray, 0, null));
         });
       });
 
       describe('with high start index', () => {
-        test('removes nothing', (splice) => {
+        it('removes nothing', () => {
           splice(array, array.length + 1, null);
-          expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+          nativeSplice(comparisonArray, comparisonArray.length + 1, null);
+          expect(array).to.deep.equal(comparisonArray);
         });
 
-        test('returns empty array', (splice) => {
-          expect(splice(array, array.length + 1, null)).to.deep.equal([]);
+        it('returns empty array', () => {
+          expect(splice(array, array.length + 1, null))
+            .to.deep.equal(nativeSplice(comparisonArray, comparisonArray.length + 1, null));
         });
       });
 
       describe('with negative start index', () => {
-        test('removes nothing', (splice) => {
+        it('removes nothing', () => {
           splice(array, -1, null);
-          expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+          nativeSplice(comparisonArray, -1, null);
+          expect(array).to.deep.equal(comparisonArray);
         });
 
-        test('returns empty array', (splice) => {
-          expect(splice(array, -1, null)).to.deep.equal([]);
+        it('returns empty array', () => {
+          expect(splice(array, -1, null))
+            .to.deep.equal(nativeSplice(comparisonArray, -1, null));
         });
       });
 
       describe('with very negative start index', () => {
-        test('removes nothing', (splice) => {
+        it('removes nothing', () => {
           splice(array, -1 - array.length, null);
-          expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+          nativeSplice(comparisonArray, -1 - comparisonArray.length, null);
+          expect(array).to.deep.equal(comparisonArray);
         });
 
-        test('returns empty array', (splice) => {
-          expect(splice(array, -1 - array.length, null)).to.deep.equal([]);
+        it('returns empty array', () => {
+          expect(splice(array, -1 - array.length, null))
+            .to.deep.equal(nativeSplice(comparisonArray, -1 - comparisonArray.length, null));
         });
       });
 
       describe('with odd start index', () => {
-        test('removes nothing', (splice) => {
+        it('removes nothing', () => {
           splice(array, null, null);
-          expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+          nativeSplice(comparisonArray, null, null);
+          expect(array).to.deep.equal(comparisonArray);
         });
 
-        test('returns empty array', (splice) => {
-          expect(splice(array, null, null)).to.deep.equal([]);
+        it('returns empty array', () => {
+          expect(splice(array, null, null))
+            .to.deep.equal(nativeSplice(comparisonArray, null, null));
         });
       });
     });
@@ -386,228 +447,268 @@ describe('Fast Splice', () => {
     describe('with 0 insert count', () => {
       describe('with 0 delete count', () => {
         describe('with 0 start index', () => {
-          test('does not alter array', (splice) => {
+          it('does not alter array', () => {
             splice(array, 0, 0, []);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, 0, 0, []);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, 0, 0, [])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, 0, 0, []))
+              .to.deep.equal(nativeSplice(comparisonArray, 0, 0, []));
           });
         });
 
         describe('with high start index', () => {
-          test('does not alter array', (splice) => {
+          it('does not alter array', () => {
             splice(array, array.length + 1, 0, []);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, comparisonArray.length + 1, 0, []);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, array.length + 1, 0, [])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, array.length + 1, 0, []))
+              .to.deep.equal(nativeSplice(comparisonArray, comparisonArray.length + 1, 0, []));
           });
         });
 
         describe('with negative start index', () => {
-          test('does not alter array', (splice) => {
+          it('does not alter array', () => {
             splice(array, -2, 0, []);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, -2, 0, []);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -2, 0, [])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -2, 0, []))
+              .to.deep.equal(nativeSplice(comparisonArray, -2, 0, []));
           });
         });
 
         describe('with very negative start index', () => {
-          test('does not alter array', (splice) => {
+          it('does not alter array', () => {
             splice(array, -array.length - 1, 0, []);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, -comparisonArray.length - 1, 0, []);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -array.length - 1, 0, [])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -array.length - 1, 0, []))
+              .to.deep.equal(nativeSplice(comparisonArray, -comparisonArray.length - 1, 0, []));
           });
         });
 
         describe('with odd start index', () => {
-          test('does not alter array', (splice) => {
+          it('does not alter array', () => {
             splice(array, null, 0, []);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, null, 0, []);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, null, 0, [])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, null, 0, []))
+              .to.deep.equal(nativeSplice(comparisonArray, null, 0, []));
           });
         });
       });
 
       describe('with high delete count', () => {
         describe('with 0 start index', () => {
-          test('removes everything', (splice) => {
+          it('removes everything', () => {
             splice(array, 0, array.length, []);
-            expect(array).to.deep.equal([]);
+            nativeSplice(comparisonArray, 0, comparisonArray.length, []);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns everything', (splice) => {
-            expect(splice(array, 0, array.length, [])).to.deep.equal([1, 2, 3, 4, 5]);
+          it('returns everything', () => {
+            expect(splice(array, 0, array.length, []))
+              .to.deep.equal(nativeSplice(comparisonArray, 0, comparisonArray.length, []));
           });
         });
 
         describe('with high start index', () => {
-          test('does not alter array', (splice) => {
+          it('does not alter array', () => {
             splice(array, array.length + 1, array.length, []);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, comparisonArray.length + 1, comparisonArray.length, []);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, array.length + 1, array.length, [])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, array.length + 1, array.length, []))
+              .to.deep.equal(nativeSplice(comparisonArray, comparisonArray.length + 1, comparisonArray.length, []));
           });
         });
 
         describe('with negative start index', () => {
-          test('removes everything after count from end', (splice) => {
+          it('removes everything after count from end', () => {
             splice(array, -2, array.length, []);
-            expect(array).to.deep.equal([1, 2, 3]);
+            nativeSplice(comparisonArray, -2, comparisonArray.length, []);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('removed elements', (splice) => {
-            expect(splice(array, -2, array.length, [])).to.deep.equal([4, 5]);
+          it('removed elements', () => {
+            expect(splice(array, -2, array.length, []))
+              .to.deep.equal(nativeSplice(comparisonArray, -2, comparisonArray.length, []));
           });
         });
 
         describe('with very negative start index', () => {
-          test('removes everything', (splice) => {
+          it('removes everything', () => {
             splice(array, -array.length - 1, array.length, []);
-            expect(array).to.deep.equal([]);
+            nativeSplice(comparisonArray, -comparisonArray.length - 1, comparisonArray.length, []);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns everything', (splice) => {
-            expect(splice(array, -array.length - 1, array.length, [])).to.deep.equal([1, 2, 3, 4, 5]);
+          it('returns everything', () => {
+            expect(splice(array, -array.length - 1, array.length, []))
+              .to.deep.equal(nativeSplice(comparisonArray, -comparisonArray.length - 1, comparisonArray.length, []));
           });
         });
 
         describe('with odd start index', () => {
-          test('removes everything', (splice) => {
+          it('removes everything', () => {
             splice(array, null, array.length, []);
-            expect(array).to.deep.equal([]);
+            nativeSplice(comparisonArray, null, comparisonArray.length, []);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns everything', (splice) => {
-            expect(splice(array, null, array.length, [])).to.deep.equal([1, 2, 3, 4, 5]);
+          it('returns everything', () => {
+            expect(splice(array, null, array.length, []))
+              .to.deep.equal(nativeSplice(comparisonArray, null, comparisonArray.length, []));
           });
         });
       });
 
       describe('with negative delete count', () => {
         describe('with 0 start index', () => {
-          test('does not alter array', (splice) => {
+          it('does not alter array', () => {
             splice(array, 0, -1, []);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, 0, -1, []);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, 0, -1, [])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, 0, -1, []))
+              .to.deep.equal(nativeSplice(comparisonArray, 0, -1, []));
           });
         });
 
         describe('with high start index', () => {
-          test('does not alter array', (splice) => {
+          it('does not alter array', () => {
             splice(array, array.length + 1, -1, []);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, comparisonArray.length + 1, -1, []);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, array.length + 1, -1, [])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, array.length + 1, -1, []))
+              .to.deep.equal(nativeSplice(comparisonArray, comparisonArray.length + 1, -1, []));
           });
         });
 
         describe('with negative start index', () => {
-          test('does not alter array', (splice) => {
+          it('does not alter array', () => {
             splice(array, -2, -1, []);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, -2, -1, []);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -2, -1, [])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -2, -1, []))
+              .to.deep.equal(nativeSplice(comparisonArray, -2, -1, []));
           });
         });
 
         describe('with very negative start index', () => {
-          test('does not alter array', (splice) => {
+          it('does not alter array', () => {
             splice(array, -array.length - 1, -1, []);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, -comparisonArray.length - 1, -1, []);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -array.length - 1, -1, [])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -array.length - 1, -1, []))
+              .to.deep.equal(nativeSplice(comparisonArray, -comparisonArray.length - 1, -1, []));
           });
         });
 
         describe('with odd start index', () => {
-          test('does not alter array', (splice) => {
+          it('does not alter array', () => {
             splice(array, null, -1, []);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, null, -1, []);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, null, -1, [])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, null, -1, []))
+              .to.deep.equal(nativeSplice(comparisonArray, null, -1, []));
           });
         });
       });
 
       describe('with odd delete count', () => {
         describe('with 0 start index', () => {
-          test('does not alter array', (splice) => {
+          it('does not alter array', () => {
             splice(array, 0, null, []);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, 0, null, []);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, 0, null, [])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, 0, null, []))
+              .to.deep.equal(nativeSplice(comparisonArray, 0, null, []));
           });
         });
 
         describe('with high start index', () => {
-          test('does not alter array', (splice) => {
+          it('does not alter array', () => {
             splice(array, array.length + 1, null, []);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, comparisonArray.length + 1, null, []);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, array.length + 1, null, [])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, array.length + 1, null, []))
+              .to.deep.equal(nativeSplice(comparisonArray, comparisonArray.length + 1, null, []));
           });
         });
 
         describe('with negative start index', () => {
-          test('does not alter array', (splice) => {
+          it('does not alter array', () => {
             splice(array, -2, null, []);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, -2, null, []);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -2, null, [])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -2, null, []))
+              .to.deep.equal(nativeSplice(comparisonArray, -2, null, []));
           });
         });
 
         describe('with very negative start index', () => {
-          test('does not alter array', (splice) => {
+          it('does not alter array', () => {
             splice(array, -array.length - 1, null, []);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, -comparisonArray.length - 1, null, []);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -array.length - 1, null, [])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -array.length - 1, null, []))
+              .to.deep.equal(nativeSplice(comparisonArray, -comparisonArray.length - 1, null, []));
           });
         });
 
         describe('with odd start index', () => {
-          test('does not alter array', (splice) => {
+          it('does not alter array', () => {
             splice(array, null, null, []);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, null, null, []);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, null, null, [])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, null, null, []))
+              .to.deep.equal(nativeSplice(comparisonArray, null, null, []));
           });
         });
       });
@@ -616,228 +717,268 @@ describe('Fast Splice', () => {
     describe('with small insert count', () => {
       describe('with 0 delete count', () => {
         describe('with 0 start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, 0, 0, [6, 7]);
-            expect(array).to.deep.equal([6, 7, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, 0, 0, [6, 7]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, 0, 0, [6, 7])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, 0, 0, [6, 7]))
+              .to.deep.equal(nativeSplice(comparisonArray, 0, 0, [6, 7]));
           });
         });
 
         describe('with high start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, array.length + 1, 0, [6, 7]);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5, 6, 7]);
+            nativeSplice(comparisonArray, comparisonArray.length + 1, 0, [6, 7]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, array.length + 1, 0, [6, 7])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, array.length + 1, 0, [6, 7]))
+              .to.deep.equal(nativeSplice(comparisonArray, comparisonArray.length + 1, 0, [6, 7]));
           });
         });
 
         describe('with negative start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, -2, 0, [6, 7]);
-            expect(array).to.deep.equal([1, 2, 3, 6, 7, 4, 5]);
+            nativeSplice(comparisonArray, -2, 0, [6, 7]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -2, 0, [6, 7])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -2, 0, [6, 7]))
+              .to.deep.equal(nativeSplice(comparisonArray, -2, 0, [6, 7]));
           });
         });
 
         describe('with very negative start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, -array.length - 1, 0, [6, 7]);
-            expect(array).to.deep.equal([6, 7, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, -comparisonArray.length - 1, 0, [6, 7]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -array.length - 1, 0, [6, 7])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -array.length - 1, 0, [6, 7]))
+              .to.deep.equal(nativeSplice(comparisonArray, -comparisonArray.length - 1, 0, [6, 7]));
           });
         });
 
         describe('with odd start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, null, 0, [6, 7]);
-            expect(array).to.deep.equal([6, 7, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, null, 0, [6, 7]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, null, 0, [6, 7])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, null, 0, [6, 7]))
+              .to.deep.equal(nativeSplice(comparisonArray, null, 0, [6, 7]));
           });
         });
       });
 
       describe('with high delete count', () => {
         describe('with 0 start index', () => {
-          test('removes and inserts elements', (splice) => {
+          it('removes and inserts elements', () => {
             splice(array, 0, array.length, [6, 7]);
-            expect(array).to.deep.equal([6, 7]);
+            nativeSplice(comparisonArray, 0, comparisonArray.length, [6, 7]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns removed elements', (splice) => {
-            expect(splice(array, 0, array.length, [6, 7])).to.deep.equal([1, 2, 3, 4, 5]);
+          it('returns removed elements', () => {
+            expect(splice(array, 0, array.length, [6, 7]))
+              .to.deep.equal(nativeSplice(comparisonArray, 0, comparisonArray.length, [6, 7]));
           });
         });
 
         describe('with high start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, array.length + 1, array.length, [6, 7]);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5, 6, 7]);
+            nativeSplice(comparisonArray, comparisonArray.length + 1, comparisonArray.length, [6, 7]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, array.length + 1, array.length, [6, 7])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, array.length + 1, array.length, [6, 7]))
+              .to.deep.equal(nativeSplice(comparisonArray, comparisonArray.length + 1, comparisonArray.length, [6, 7]));
           });
         });
 
         describe('with negative start index', () => {
-          test('removes and inserts elements', (splice) => {
+          it('removes and inserts elements', () => {
             splice(array, -3, array.length, [6, 7]);
-            expect(array).to.deep.equal([1, 2, 6, 7]);
+            nativeSplice(comparisonArray, -3, comparisonArray.length, [6, 7]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns removed elements', (splice) => {
-            expect(splice(array, -3, array.length, [6, 7])).to.deep.equal([3, 4, 5]);
+          it('returns removed elements', () => {
+            expect(splice(array, -3, array.length, [6, 7]))
+              .to.deep.equal(nativeSplice(comparisonArray, -3, comparisonArray.length, [6, 7]));
           });
         });
 
         describe('with very negative start index', () => {
-          test('removes and inserts elements', (splice) => {
+          it('removes and inserts elements', () => {
             splice(array, -array.length - 1, array.length, [6, 7]);
-            expect(array).to.deep.equal([6, 7]);
+            nativeSplice(comparisonArray, -comparisonArray.length - 1, comparisonArray.length, [6, 7]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns everything', (splice) => {
-            expect(splice(array, -array.length - 1, array.length, [6, 7])).to.deep.equal([1, 2, 3, 4, 5]);
+          it('returns everything', () => {
+            expect(splice(array, -array.length - 1, array.length, [6, 7]))
+              .to.deep.equal(nativeSplice(comparisonArray, -comparisonArray.length - 1, comparisonArray.length, [6, 7]));
           });
         });
 
         describe('with odd start index', () => {
-          test('removes and inserts elements', (splice) => {
+          it('removes and inserts elements', () => {
             splice(array, null, array.length, [6, 7]);
-            expect(array).to.deep.equal([6, 7]);
+            nativeSplice(comparisonArray, null, comparisonArray.length, [6, 7]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns everything', (splice) => {
-            expect(splice(array, null, array.length, [6, 7])).to.deep.equal([1, 2, 3, 4, 5]);
+          it('returns everything', () => {
+            expect(splice(array, null, array.length, [6, 7]))
+              .to.deep.equal(nativeSplice(comparisonArray, null, comparisonArray.length, [6, 7]));
           });
         });
       });
 
       describe('with negative delete count', () => {
         describe('with 0 start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, 0, -1, [6, 7]);
-            expect(array).to.deep.equal([6, 7, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, 0, -1, [6, 7]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, 0, -1, [6, 7])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, 0, -1, [6, 7]))
+              .to.deep.equal(nativeSplice(comparisonArray, 0, -1, [6, 7]));
           });
         });
 
         describe('with high start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, array.length + 1, -1, [6, 7]);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5, 6, 7]);
+            nativeSplice(comparisonArray, comparisonArray.length + 1, -1, [6, 7]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, array.length + 1, -1, [6, 7])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, array.length + 1, -1, [6, 7]))
+              .to.deep.equal(nativeSplice(comparisonArray, comparisonArray.length + 1, -1, [6, 7]));
           });
         });
 
         describe('with negative start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, -2, -1, [6, 7]);
-            expect(array).to.deep.equal([1, 2, 3, 6, 7, 4, 5]);
+            nativeSplice(comparisonArray, -2, -1, [6, 7]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -2, -1, [6, 7])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -2, -1, [6, 7]))
+              .to.deep.equal(nativeSplice(comparisonArray, -2, -1, [6, 7]));
           });
         });
 
         describe('with very negative start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, -array.length - 1, -1, [6, 7]);
-            expect(array).to.deep.equal([6, 7, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, -comparisonArray.length - 1, -1, [6, 7]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -array.length - 1, -1, [6, 7])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -array.length - 1, -1, [6, 7]))
+              .to.deep.equal(nativeSplice(comparisonArray, -comparisonArray.length - 1, -1, [6, 7]));
           });
         });
 
         describe('with odd start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, null, -1, [6, 7]);
-            expect(array).to.deep.equal([6, 7, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, null, -1, [6, 7]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, null, -1, [6, 7])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, null, -1, [6, 7]))
+              .to.deep.equal(nativeSplice(comparisonArray, null, -1, [6, 7]));
           });
         });
       });
 
       describe('with odd delete count', () => {
         describe('with 0 start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, 0, null, [6, 7]);
-            expect(array).to.deep.equal([6, 7, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, 0, null, [6, 7]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, 0, null, [6, 7])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, 0, null, [6, 7]))
+              .to.deep.equal(nativeSplice(comparisonArray, 0, null, [6, 7]));
           });
         });
 
         describe('with high start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, array.length + 1, null, [6, 7]);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5, 6, 7]);
+            nativeSplice(comparisonArray, comparisonArray.length + 1, null, [6, 7]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, array.length + 1, null, [6, 7])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, array.length + 1, null, [6, 7]))
+              .to.deep.equal(nativeSplice(comparisonArray, comparisonArray.length + 1, null, [6, 7]));
           });
         });
 
         describe('with negative start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, -2, null, [6, 7]);
-            expect(array).to.deep.equal([1, 2, 3, 6, 7, 4, 5]);
+            nativeSplice(comparisonArray, -2, null, [6, 7]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -2, null, [6, 7])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -2, null, [6, 7]))
+              .to.deep.equal(nativeSplice(comparisonArray, -2, null, [6, 7]));
           });
         });
 
         describe('with very negative start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, -array.length - 1, null, [6, 7]);
-            expect(array).to.deep.equal([6, 7, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, -comparisonArray.length - 1, null, [6, 7]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -array.length - 1, null, [6, 7])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -array.length - 1, null, [6, 7]))
+              .to.deep.equal(nativeSplice(comparisonArray, -comparisonArray.length - 1, null, [6, 7]));
           });
         });
 
         describe('with odd start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, null, null, [6, 7]);
-            expect(array).to.deep.equal([6, 7, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, null, null, [6, 7]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, null, null, [6, 7])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, null, null, [6, 7]))
+              .to.deep.equal(nativeSplice(comparisonArray, null, null, [6, 7]));
           });
         });
       });
@@ -846,228 +987,268 @@ describe('Fast Splice', () => {
     describe('with large insert count', () => {
       describe('with 0 delete count', () => {
         describe('with 0 start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, 0, 0, [6, 7, 8, 9, 10]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, 0, 0, [6, 7, 8, 9, 10]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, 0, 0, [6, 7, 8, 9, 10])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, 0, 0, [6, 7, 8, 9, 10]))
+              .to.deep.equal(nativeSplice(comparisonArray, 0, 0, [6, 7, 8, 9, 10]));
           });
         });
 
         describe('with high start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, array.length + 1, 0, [6, 7, 8, 9, 10]);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+            nativeSplice(comparisonArray, comparisonArray.length + 1, 0, [6, 7, 8, 9, 10]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, array.length + 1, 0, [6, 7, 8, 9, 10])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, array.length + 1, 0, [6, 7, 8, 9, 10]))
+              .to.deep.equal(nativeSplice(comparisonArray, comparisonArray.length + 1, 0, [6, 7, 8, 9, 10]));
           });
         });
 
         describe('with negative start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, -2, 0, [6, 7, 8, 9, 10]);
-            expect(array).to.deep.equal([1, 2, 3, 6, 7, 8, 9, 10, 4, 5]);
+            nativeSplice(comparisonArray, -2, 0, [6, 7, 8, 9, 10]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -2, 0, [6, 7, 8, 9, 10])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -2, 0, [6, 7, 8, 9, 10]))
+              .to.deep.equal(nativeSplice(comparisonArray, -2, 0, [6, 7, 8, 9, 10]));
           });
         });
 
         describe('with very negative start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, -array.length - 1, 0, [6, 7, 8, 9, 10]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, -comparisonArray.length - 1, 0, [6, 7, 8, 9, 10]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -array.length - 1, 0, [6, 7, 8, 9, 10])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -array.length - 1, 0, [6, 7, 8, 9, 10]))
+              .to.deep.equal(nativeSplice(comparisonArray, -comparisonArray.length - 1, 0, [6, 7, 8, 9, 10]));
           });
         });
 
         describe('with odd start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, null, 0, [6, 7, 8, 9, 10]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, null, 0, [6, 7, 8, 9, 10]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, null, 0, [6, 7, 8, 9, 10])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, null, 0, [6, 7, 8, 9, 10]))
+              .to.deep.equal(nativeSplice(comparisonArray, null, 0, [6, 7, 8, 9, 10]));
           });
         });
       });
 
       describe('with high delete count', () => {
         describe('with 0 start index', () => {
-          test('removes and inserts elements', (splice) => {
+          it('removes and inserts elements', () => {
             splice(array, 0, array.length, [6, 7, 8, 9, 10]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10]);
+            nativeSplice(comparisonArray, 0, comparisonArray.length, [6, 7, 8, 9, 10]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns removed elements', (splice) => {
-            expect(splice(array, 0, array.length, [6, 7, 8, 9, 10])).to.deep.equal([1, 2, 3, 4, 5]);
+          it('returns removed elements', () => {
+            expect(splice(array, 0, array.length, [6, 7, 8, 9, 10]))
+              .to.deep.equal(nativeSplice(comparisonArray, 0, comparisonArray.length, [6, 7, 8, 9, 10]));
           });
         });
 
         describe('with high start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, array.length + 1, array.length, [6, 7, 8, 9, 10]);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+            nativeSplice(comparisonArray, comparisonArray.length + 1, comparisonArray.length, [6, 7, 8, 9, 10]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, array.length + 1, array.length, [6, 7, 8, 9, 10])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, array.length + 1, array.length, [6, 7, 8, 9, 10]))
+              .to.deep.equal(nativeSplice(comparisonArray, comparisonArray.length + 1, comparisonArray.length, [6, 7, 8, 9, 10]));
           });
         });
 
         describe('with negative start index', () => {
-          test('removes and inserts elements', (splice) => {
+          it('removes and inserts elements', () => {
             splice(array, -2, array.length, [6, 7, 8, 9, 10]);
-            expect(array).to.deep.equal([1, 2, 3, 6, 7, 8, 9, 10]);
+            nativeSplice(comparisonArray, -2, comparisonArray.length, [6, 7, 8, 9, 10]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns removed elements', (splice) => {
-            expect(splice(array, -2, array.length, [6, 7, 8, 9, 10])).to.deep.equal([4, 5]);
+          it('returns removed elements', () => {
+            expect(splice(array, -2, array.length, [6, 7, 8, 9, 10]))
+              .to.deep.equal(nativeSplice(comparisonArray, -2, comparisonArray.length, [6, 7, 8, 9, 10]));
           });
         });
 
         describe('with very negative start index', () => {
-          test('removes and inserts elements', (splice) => {
+          it('removes and inserts elements', () => {
             splice(array, -array.length - 1, array.length, [6, 7, 8, 9, 10]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10]);
+            nativeSplice(comparisonArray, -comparisonArray.length - 1, comparisonArray.length, [6, 7, 8, 9, 10]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns everything', (splice) => {
-            expect(splice(array, -array.length - 1, array.length, [6, 7, 8, 9, 10])).to.deep.equal([1, 2, 3, 4, 5]);
+          it('returns everything', () => {
+            expect(splice(array, -array.length - 1, array.length, [6, 7, 8, 9, 10]))
+              .to.deep.equal(nativeSplice(comparisonArray, -comparisonArray.length - 1, comparisonArray.length, [6, 7, 8, 9, 10]));
           });
         });
 
         describe('with odd start index', () => {
-          test('removes and inserts elements', (splice) => {
+          it('removes and inserts elements', () => {
             splice(array, null, array.length, [6, 7, 8, 9, 10]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10]);
+            nativeSplice(comparisonArray, null, comparisonArray.length, [6, 7, 8, 9, 10]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns everything', (splice) => {
-            expect(splice(array, null, array.length, [6, 7, 8, 9, 10])).to.deep.equal([1, 2, 3, 4, 5]);
+          it('returns everything', () => {
+            expect(splice(array, null, array.length, [6, 7, 8, 9, 10]))
+              .to.deep.equal(nativeSplice(comparisonArray, null, comparisonArray.length, [6, 7, 8, 9, 10]));
           });
         });
       });
 
       describe('with negative delete count', () => {
         describe('with 0 start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, 0, -1, [6, 7, 8, 9, 10]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, 0, -1, [6, 7, 8, 9, 10]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, 0, -1, [6, 7, 8, 9, 10])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, 0, -1, [6, 7, 8, 9, 10]))
+              .to.deep.equal(nativeSplice(comparisonArray, 0, -1, [6, 7, 8, 9, 10]));
           });
         });
 
         describe('with high start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, array.length + 1, -1, [6, 7, 8, 9, 10]);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+            nativeSplice(comparisonArray, comparisonArray.length + 1, -1, [6, 7, 8, 9, 10]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, array.length + 1, -1, [6, 7, 8, 9, 10])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, array.length + 1, -1, [6, 7, 8, 9, 10]))
+              .to.deep.equal(nativeSplice(comparisonArray, comparisonArray.length + 1, -1, [6, 7, 8, 9, 10]));
           });
         });
 
         describe('with negative start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, -2, -1, [6, 7, 8, 9, 10]);
-            expect(array).to.deep.equal([1, 2, 3, 6, 7, 8, 9, 10, 4, 5]);
+            nativeSplice(comparisonArray, -2, -1, [6, 7, 8, 9, 10]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -2, -1, [6, 7, 8, 9, 10])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -2, -1, [6, 7, 8, 9, 10]))
+              .to.deep.equal(nativeSplice(comparisonArray, -2, -1, [6, 7, 8, 9, 10]));
           });
         });
 
         describe('with very negative start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, -array.length - 1, -1, [6, 7, 8, 9, 10]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, -comparisonArray.length - 1, -1, [6, 7, 8, 9, 10]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -array.length - 1, -1, [6, 7, 8, 9, 10])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -array.length - 1, -1, [6, 7, 8, 9, 10]))
+              .to.deep.equal(nativeSplice(comparisonArray, -comparisonArray.length - 1, -1, [6, 7, 8, 9, 10]));
           });
         });
 
         describe('with odd start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, null, -1, [6, 7, 8, 9, 10]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, null, -1, [6, 7, 8, 9, 10]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, null, -1, [6, 7, 8, 9, 10])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, null, -1, [6, 7, 8, 9, 10]))
+              .to.deep.equal(nativeSplice(comparisonArray, null, -1, [6, 7, 8, 9, 10]));
           });
         });
       });
 
       describe('with odd delete count', () => {
         describe('with 0 start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, 0, null, [6, 7, 8, 9, 10]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, 0, null, [6, 7, 8, 9, 10]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, 0, null, [6, 7, 8, 9, 10])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, 0, null, [6, 7, 8, 9, 10]))
+              .to.deep.equal(nativeSplice(comparisonArray, 0, null, [6, 7, 8, 9, 10]));
           });
         });
 
         describe('with high start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, array.length + 1, null, [6, 7, 8, 9, 10]);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+            nativeSplice(comparisonArray, comparisonArray.length + 1, null, [6, 7, 8, 9, 10]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, array.length + 1, null, [6, 7, 8, 9, 10])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, array.length + 1, null, [6, 7, 8, 9, 10]))
+              .to.deep.equal(nativeSplice(comparisonArray, comparisonArray.length + 1, null, [6, 7, 8, 9, 10]));
           });
         });
 
         describe('with negative start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, -2, null, [6, 7, 8, 9, 10]);
-            expect(array).to.deep.equal([1, 2, 3, 6, 7, 8, 9, 10, 4, 5]);
+            nativeSplice(comparisonArray, -2, null, [6, 7, 8, 9, 10]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -2, null, [6, 7, 8, 9, 10])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -2, null, [6, 7, 8, 9, 10]))
+              .to.deep.equal(nativeSplice(comparisonArray, -2, null, [6, 7, 8, 9, 10]));
           });
         });
 
         describe('with very negative start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, -array.length - 1, null, [6, 7, 8, 9, 10]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, -comparisonArray.length - 1, null, [6, 7, 8, 9, 10]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -array.length - 1, null, [6, 7, 8, 9, 10])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -array.length - 1, null, [6, 7, 8, 9, 10]))
+              .to.deep.equal(nativeSplice(comparisonArray, -comparisonArray.length - 1, null, [6, 7, 8, 9, 10]));
           });
         });
 
         describe('with odd start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, null, null, [6, 7, 8, 9, 10]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, null, null, [6, 7, 8, 9, 10]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, null, null, [6, 7, 8, 9, 10])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, null, null, [6, 7, 8, 9, 10]))
+              .to.deep.equal(nativeSplice(comparisonArray, null, null, [6, 7, 8, 9, 10]));
           });
         });
       });
@@ -1076,228 +1257,268 @@ describe('Fast Splice', () => {
     describe('with very large insert count', () => {
       describe('with 0 delete count', () => {
         describe('with 0 start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, 0, 0, [6, 7, 8, 9, 10, 11, 12]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, 0, 0, [6, 7, 8, 9, 10, 11, 12]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, 0, 0, [6, 7, 8, 9, 10, 11, 12])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, 0, 0, [6, 7, 8, 9, 10, 11, 12]))
+              .to.deep.equal(nativeSplice(comparisonArray, 0, 0, [6, 7, 8, 9, 10, 11, 12]));
           });
         });
 
         describe('with high start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, array.length + 1, 0, [6, 7, 8, 9, 10, 11, 12]);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+            nativeSplice(comparisonArray, comparisonArray.length + 1, 0, [6, 7, 8, 9, 10, 11, 12]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, array.length + 1, 0, [6, 7, 8, 9, 10, 11, 12])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, array.length + 1, 0, [6, 7, 8, 9, 10, 11, 12]))
+              .to.deep.equal(nativeSplice(comparisonArray, comparisonArray.length + 1, 0, [6, 7, 8, 9, 10, 11, 12]));
           });
         });
 
         describe('with negative start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, -2, 0, [6, 7, 8, 9, 10, 11, 12]);
-            expect(array).to.deep.equal([1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 4, 5]);
+            nativeSplice(comparisonArray, -2, 0, [6, 7, 8, 9, 10, 11, 12]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -2, 0, [6, 7, 8, 9, 10, 11, 12])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -2, 0, [6, 7, 8, 9, 10, 11, 12]))
+              .to.deep.equal(nativeSplice(comparisonArray, -2, 0, [6, 7, 8, 9, 10, 11, 12]));
           });
         });
 
         describe('with very negative start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, -array.length - 1, 0, [6, 7, 8, 9, 10, 11, 12]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, -comparisonArray.length - 1, 0, [6, 7, 8, 9, 10, 11, 12]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -array.length - 1, 0, [6, 7, 8, 9, 10, 11, 12])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -array.length - 1, 0, [6, 7, 8, 9, 10, 11, 12]))
+              .to.deep.equal(nativeSplice(comparisonArray, -comparisonArray.length - 1, 0, [6, 7, 8, 9, 10, 11, 12]));
           });
         });
 
         describe('with odd start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, null, 0, [6, 7, 8, 9, 10, 11, 12]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, null, 0, [6, 7, 8, 9, 10, 11, 12]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, null, 0, [6, 7, 8, 9, 10, 11, 12])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, null, 0, [6, 7, 8, 9, 10, 11, 12]))
+              .to.deep.equal(nativeSplice(comparisonArray, null, 0, [6, 7, 8, 9, 10, 11, 12]));
           });
         });
       });
 
       describe('with high delete count', () => {
         describe('with 0 start index', () => {
-          test('removes and inserts elements', (splice) => {
+          it('removes and inserts elements', () => {
             splice(array, 0, array.length, [6, 7, 8, 9, 10, 11, 12]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10, 11, 12]);
+            nativeSplice(comparisonArray, 0, comparisonArray.length, [6, 7, 8, 9, 10, 11, 12]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns removed elements', (splice) => {
-            expect(splice(array, 0, array.length, [6, 7, 8, 9, 10, 11, 12])).to.deep.equal([1, 2, 3, 4, 5]);
+          it('returns removed elements', () => {
+            expect(splice(array, 0, array.length, [6, 7, 8, 9, 10, 11, 12]))
+              .to.deep.equal(nativeSplice(comparisonArray, 0, comparisonArray.length, [6, 7, 8, 9, 10, 11, 12]));
           });
         });
 
         describe('with high start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, array.length + 1, array.length, [6, 7, 8, 9, 10, 11, 12]);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+            nativeSplice(comparisonArray, comparisonArray.length + 1, comparisonArray.length, [6, 7, 8, 9, 10, 11, 12]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, array.length + 1, array.length, [6, 7, 8, 9, 10, 11, 12])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, array.length + 1, array.length, [6, 7, 8, 9, 10, 11, 12]))
+              .to.deep.equal(nativeSplice(comparisonArray, comparisonArray.length + 1, comparisonArray.length, [6, 7, 8, 9, 10, 11, 12]));
           });
         });
 
         describe('with negative start index', () => {
-          test('removes and inserts elements', (splice) => {
+          it('removes and inserts elements', () => {
             splice(array, -2, array.length, [6, 7, 8, 9, 10, 11, 12]);
-            expect(array).to.deep.equal([1, 2, 3, 6, 7, 8, 9, 10, 11, 12]);
+            nativeSplice(comparisonArray, -2, comparisonArray.length, [6, 7, 8, 9, 10, 11, 12]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns removed elements', (splice) => {
-            expect(splice(array, -2, array.length, [6, 7, 8, 9, 10, 11, 12])).to.deep.equal([4, 5]);
+          it('returns removed elements', () => {
+            expect(splice(array, -2, array.length, [6, 7, 8, 9, 10, 11, 12]))
+              .to.deep.equal(nativeSplice(comparisonArray, -2, comparisonArray.length, [6, 7, 8, 9, 10, 11, 12]));
           });
         });
 
         describe('with very negative start index', () => {
-          test('removes and inserts elements', (splice) => {
+          it('removes and inserts elements', () => {
             splice(array, -array.length - 1, array.length, [6, 7, 8, 9, 10, 11, 12]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10, 11, 12]);
+            nativeSplice(comparisonArray, -comparisonArray.length - 1, comparisonArray.length, [6, 7, 8, 9, 10, 11, 12]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns everything', (splice) => {
-            expect(splice(array, -array.length - 1, array.length, [6, 7, 8, 9, 10, 11, 12])).to.deep.equal([1, 2, 3, 4, 5]);
+          it('returns everything', () => {
+            expect(splice(array, -array.length - 1, array.length, [6, 7, 8, 9, 10, 11, 12]))
+              .to.deep.equal(nativeSplice(comparisonArray, -comparisonArray.length - 1, comparisonArray.length, [6, 7, 8, 9, 10, 11, 12]));
           });
         });
 
         describe('with odd start index', () => {
-          test('removes and inserts elements', (splice) => {
+          it('removes and inserts elements', () => {
             splice(array, null, array.length, [6, 7, 8, 9, 10, 11, 12]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10, 11, 12]);
+            nativeSplice(comparisonArray, null, comparisonArray.length, [6, 7, 8, 9, 10, 11, 12]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns everything', (splice) => {
-            expect(splice(array, null, array.length, [6, 7, 8, 9, 10, 11, 12])).to.deep.equal([1, 2, 3, 4, 5]);
+          it('returns everything', () => {
+            expect(splice(array, null, array.length, [6, 7, 8, 9, 10, 11, 12]))
+              .to.deep.equal(nativeSplice(comparisonArray, null, comparisonArray.length, [6, 7, 8, 9, 10, 11, 12]));
           });
         });
       });
 
       describe('with negative delete count', () => {
         describe('with 0 start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, 0, -1, [6, 7, 8, 9, 10, 11, 12]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, 0, -1, [6, 7, 8, 9, 10, 11, 12]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, 0, -1, [6, 7, 8, 9, 10, 11, 12])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, 0, -1, [6, 7, 8, 9, 10, 11, 12]))
+              .to.deep.equal(nativeSplice(comparisonArray, 0, -1, [6, 7, 8, 9, 10, 11, 12]));
           });
         });
 
         describe('with high start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, array.length + 1, -1, [6, 7, 8, 9, 10, 11, 12]);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+            nativeSplice(comparisonArray, comparisonArray.length + 1, -1, [6, 7, 8, 9, 10, 11, 12]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, array.length + 1, -1, [6, 7, 8, 9, 10, 11, 12])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, array.length + 1, -1, [6, 7, 8, 9, 10, 11, 12]))
+              .to.deep.equal(nativeSplice(comparisonArray, comparisonArray.length + 1, -1, [6, 7, 8, 9, 10, 11, 12]));
           });
         });
 
         describe('with negative start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, -2, -1, [6, 7, 8, 9, 10, 11, 12]);
-            expect(array).to.deep.equal([1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 4, 5]);
+            nativeSplice(comparisonArray, -2, -1, [6, 7, 8, 9, 10, 11, 12]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -2, -1, [6, 7, 8, 9, 10, 11, 12])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -2, -1, [6, 7, 8, 9, 10, 11, 12]))
+              .to.deep.equal(nativeSplice(comparisonArray, -2, -1, [6, 7, 8, 9, 10, 11, 12]));
           });
         });
 
         describe('with very negative start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, -array.length - 1, -1, [6, 7, 8, 9, 10, 11, 12]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, -comparisonArray.length - 1, -1, [6, 7, 8, 9, 10, 11, 12]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -array.length - 1, -1, [6, 7, 8, 9, 10, 11, 12])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -array.length - 1, -1, [6, 7, 8, 9, 10, 11, 12]))
+              .to.deep.equal(nativeSplice(comparisonArray, -comparisonArray.length - 1, -1, [6, 7, 8, 9, 10, 11, 12]));
           });
         });
 
         describe('with odd start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, null, -1, [6, 7, 8, 9, 10, 11, 12]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, null, -1, [6, 7, 8, 9, 10, 11, 12]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, null, -1, [6, 7, 8, 9, 10, 11, 12])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, null, -1, [6, 7, 8, 9, 10, 11, 12]))
+              .to.deep.equal(nativeSplice(comparisonArray, null, -1, [6, 7, 8, 9, 10, 11, 12]));
           });
         });
       });
 
       describe('with odd delete count', () => {
         describe('with 0 start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, 0, null, [6, 7, 8, 9, 10, 11, 12]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, 0, null, [6, 7, 8, 9, 10, 11, 12]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, 0, null, [6, 7, 8, 9, 10, 11, 12])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, 0, null, [6, 7, 8, 9, 10, 11, 12]))
+              .to.deep.equal(nativeSplice(comparisonArray, 0, null, [6, 7, 8, 9, 10, 11, 12]));
           });
         });
 
         describe('with high start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, array.length + 1, null, [6, 7, 8, 9, 10, 11, 12]);
-            expect(array).to.deep.equal([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+            nativeSplice(comparisonArray, comparisonArray.length + 1, null, [6, 7, 8, 9, 10, 11, 12]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, array.length + 1, null, [6, 7, 8, 9, 10, 11, 12])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, array.length + 1, null, [6, 7, 8, 9, 10, 11, 12]))
+              .to.deep.equal(nativeSplice(comparisonArray, comparisonArray.length + 1, null, [6, 7, 8, 9, 10, 11, 12]));
           });
         });
 
         describe('with negative start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, -2, null, [6, 7, 8, 9, 10, 11, 12]);
-            expect(array).to.deep.equal([1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 4, 5]);
+            nativeSplice(comparisonArray, -2, null, [6, 7, 8, 9, 10, 11, 12]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -2, null, [6, 7, 8, 9, 10, 11, 12])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -2, null, [6, 7, 8, 9, 10, 11, 12]))
+              .to.deep.equal(nativeSplice(comparisonArray, -2, null, [6, 7, 8, 9, 10, 11, 12]));
           });
         });
 
         describe('with very negative start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, -array.length - 1, null, [6, 7, 8, 9, 10, 11, 12]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, -comparisonArray.length - 1, null, [6, 7, 8, 9, 10, 11, 12]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, -array.length - 1, null, [6, 7, 8, 9, 10, 11, 12])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, -array.length - 1, null, [6, 7, 8, 9, 10, 11, 12]))
+              .to.deep.equal(nativeSplice(comparisonArray, -comparisonArray.length - 1, null, [6, 7, 8, 9, 10, 11, 12]));
           });
         });
 
         describe('with odd start index', () => {
-          test('inserts elements', (splice) => {
+          it('inserts elements', () => {
             splice(array, null, null, [6, 7, 8, 9, 10, 11, 12]);
-            expect(array).to.deep.equal([6, 7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5]);
+            nativeSplice(comparisonArray, null, null, [6, 7, 8, 9, 10, 11, 12]);
+            expect(array).to.deep.equal(comparisonArray);
           });
 
-          test('returns empty array', (splice) => {
-            expect(splice(array, null, null, [6, 7, 8, 9, 10, 11, 12])).to.deep.equal([]);
+          it('returns empty array', () => {
+            expect(splice(array, null, null, [6, 7, 8, 9, 10, 11, 12]))
+              .to.deep.equal(nativeSplice(comparisonArray, null, null, [6, 7, 8, 9, 10, 11, 12]));
           });
         });
       });
