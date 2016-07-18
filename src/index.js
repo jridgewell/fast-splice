@@ -1,5 +1,7 @@
 import toInteger from 'lodash.tointeger';
 
+const empty = [];
+
 function fastSplice(array, start, deleteCount, inserts, argsLength) {
   if (!Array.isArray(array)) {
     throw new TypeError('Need an array to splice.')
@@ -10,7 +12,8 @@ function fastSplice(array, start, deleteCount, inserts, argsLength) {
   if (argsLength == 1) {
     return [];
   }
-  const length = array.length;
+
+  let length = array.length;
   start = toInteger(start);
   if (start < 0) {
     start = Math.max(length + start, 0);
@@ -24,34 +27,36 @@ function fastSplice(array, start, deleteCount, inserts, argsLength) {
     deleteCount = Math.min(Math.max(toInteger(deleteCount), 0), length - start);
   }
 
-  if (deleteCount === 0 && inserts.length === 0) {
-    return [];
+  let removals;
+  if (deleteCount) {
+    removals = array.splice(start, deleteCount);
+    length -= deleteCount;
+  } else {
+    removals = [];
   }
 
-  const tail = Array(length - start);
-  const iLength = inserts.length;
+  const insertLength = inserts.length;
+  const edge = start + insertLength;
+  const need = Math.max(edge - length, 0);
   let i;
-  for (i = 0; i < tail.length; i++) {
-    tail[i] = array[i + start];
+
+  // Append inserts that'll end up on the end of the array to the array.
+  for (i = length; i < edge; i++) {
+    array[i] = inserts[i - start];
   }
-  for (i = 0; i < iLength; i++) {
-    array[i + start] = inserts[i];
+  for (i = length - insertLength + need; i < length; i++) {
+    array[i + insertLength] = array[i];
   }
-  for (i = 0; i < tail.length - deleteCount; i++) {
-    array[i + iLength + start] = tail[i + deleteCount];
+  for (i = length - 1; i >= edge; i--) {
+    array[i] = array[i - insertLength];
   }
-  for (i = deleteCount; i < inserts.length; i++) {
+  for (i = 0; i < insertLength - need; i++) {
     array[i + start] = inserts[i];
   }
 
-  const totalDeletes = deleteCount - iLength;
-  if (totalDeletes > 0) {
-    array.length -= totalDeletes;
-  }
-  tail.length = deleteCount;
-  return tail;
+  return removals;
 }
 
-export default function(array, start, deleteCount, inserts = []) {
+export default function(array, start, deleteCount, inserts = empty) {
   return fastSplice(array, start, deleteCount, inserts, arguments.length);
 }
