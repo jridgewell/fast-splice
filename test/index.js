@@ -4,8 +4,48 @@ import splice from '../src';
 describe('Fast Splice', () => {
   let array;
   let comparisonArray;
+
+  const proxiedArray = (function() {
+    let gets;
+    let sets;
+    const proxyHandler = {
+      get: function(target, property) {
+        // Allow two gets, one for the splice and one for the deep equals.
+        if (gets[property] > 2) {
+          throw new Error(`got ${property} multiple times`);
+        } else if (!gets[property]) {
+          gets[property] = 0;
+        }
+        gets[property]++;
+        return target[property];
+      },
+
+      set: function(target, property, value) {
+        // Allow two sets, one for the splice and one for the deep equals.
+        if (sets[property] > 2) {
+          throw new Error(`set ${property} multiple times`);
+        } else if (!sets[property]) {
+          sets[property] = 0;
+        }
+        sets[property]++;
+        target[property] = value;
+        return true;
+      }
+    };
+
+    return function proxiedArray(array) {
+      if (typeof Proxy === 'undefined') {
+        return array;
+      }
+
+      gets = Object.create(null);
+      sets = Object.create(null);
+      return new Proxy(array, proxyHandler);
+    }
+  }());
+
   beforeEach(() => {
-    array = [1, 2, 3, 4, 5];
+    array = proxiedArray([1, 2, 3, 4, 5]);
     comparisonArray = [1, 2, 3, 4, 5];
   });
 
