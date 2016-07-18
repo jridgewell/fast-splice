@@ -27,31 +27,37 @@ function fastSplice(array, start, deleteCount, inserts, argsLength) {
     deleteCount = Math.min(Math.max(toInteger(deleteCount), 0), length - start);
   }
 
-  let removals;
-  if (deleteCount) {
-    removals = array.splice(start, deleteCount);
-    length -= deleteCount;
-  } else {
-    removals = [];
+  let i;
+  const removals = Array(deleteCount);
+  for (i = 0; i < deleteCount; i++) {
+    removals[i] = array[i + start];
   }
 
-  const insertLength = inserts.length;
-  const edge = start + insertLength;
+  const insertCount = inserts.length;
+  const edge = start + insertCount;
   const need = Math.max(edge - length, 0);
-  let i;
 
   // Append inserts that'll end up on the end of the array to the array.
-  for (i = length; i < edge; i++) {
+  for (i = length - deleteCount; i < edge; i++) {
     array[i] = inserts[i - start];
   }
-  for (i = length - insertLength + need; i < length; i++) {
-    array[i + insertLength] = array[i];
+  if (insertCount) {
+    for (i = length - insertCount + need; i < length - deleteCount; i++) {
+      array[i + insertCount] = array[i];
+    }
+    for (i = length - 1 - deleteCount; i >= edge; i--) {
+      array[i] = array[i - insertCount];
+    }
   }
-  for (i = length - 1; i >= edge; i--) {
-    array[i] = array[i - insertLength];
+  for (i = start; i < length - deleteCount; i++) {
+    array[i] = array[i + deleteCount];
   }
-  for (i = 0; i < insertLength - need; i++) {
+  for (i = deleteCount; i < insertCount; i++) {
     array[i + start] = inserts[i];
+  }
+
+  if (deleteCount) {
+    array.length = length - deleteCount + insertCount;
   }
 
   return removals;
