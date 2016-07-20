@@ -1,45 +1,51 @@
 import { expect } from 'chai';
-import splice from '../src';
+import multiSplice from '../src';
 
 describe('Fast Splice', () => {
   let array;
   let comparisonArray;
+  let gets;
+  let sets;
+
+  function enableProxy() {
+    gets = Object.create(null);
+    sets = Object.create(null);
+  }
+  function disableProxy() {
+    gets = sets = null;
+  }
 
   const proxiedArray = (function() {
-    let gets;
-    let sets;
     const proxyHandler = {
       get: function(target, property) {
         // Allow two gets, one for the splice and one for the deep equals.
-        if (gets[property] > 2) {
-          throw new Error(`got ${property} multiple times`);
-        } else if (!gets[property]) {
-          gets[property] = 0;
+        if (gets) {
+          if (gets[property]) {
+            throw new Error(`got ${property} multiple times`);
+          }
+          gets[property] = true;
         }
-        gets[property]++;
         return target[property];
       },
 
       set: function(target, property, value) {
         // Allow two sets, one for the splice and one for the deep equals.
-        if (sets[property] > 2) {
-          throw new Error(`set ${property} multiple times`);
-        } else if (!sets[property]) {
-          sets[property] = 0;
+        if (sets) {
+          if (sets[property]) {
+            throw new Error(`set ${property} multiple times`);
+          }
+          sets[property] = true;
         }
-        sets[property]++;
         target[property] = value;
         return true;
       }
     };
 
     return function proxiedArray(array) {
-      // if (typeof Proxy === 'undefined') {
+      if (typeof Proxy === 'undefined') {
         return array;
-      // }
+      }
 
-      gets = Object.create(null);
-      sets = Object.create(null);
       return new Proxy(array, proxyHandler);
     }
   }());
@@ -47,8 +53,15 @@ describe('Fast Splice', () => {
   beforeEach(() => {
     array = proxiedArray([1, 2, 3, 4, 5]);
     comparisonArray = [1, 2, 3, 4, 5];
+    disableProxy();
   });
 
+  function splice(...args) {
+    enableProxy();
+    let ret = multiSplice.apply(this, args);
+    disableProxy();
+    return ret;
+  }
   function nativeSplice(arr, ...args) {
     if (args.length === 3) {
       args.push(...args.pop());
@@ -135,14 +148,14 @@ describe('Fast Splice', () => {
 
     describe('with very negative start index', () => {
       it('removes everything', () => {
-        splice(array, -1 - array.length);
-        nativeSplice(comparisonArray, -1 - comparisonArray.length);
+        splice(array, -array.length - 1);
+        nativeSplice(comparisonArray, -comparisonArray.length - 1);
         expect(array).to.deep.equal(comparisonArray);
       });
 
       it('returns everything', () => {
-        expect(splice(array, -1 - array.length))
-          .to.deep.equal(nativeSplice(comparisonArray, -1 - comparisonArray.length));
+        expect(splice(array, -array.length - 1))
+          .to.deep.equal(nativeSplice(comparisonArray, -comparisonArray.length - 1));
       });
     });
 
@@ -216,14 +229,14 @@ describe('Fast Splice', () => {
 
       describe('with very negative start index', () => {
         it('removes nothing', () => {
-          splice(array, -1 - array.length, 0);
-          nativeSplice(comparisonArray, -1 - comparisonArray.length, 0);
+          splice(array, -array.length - 1, 0);
+          nativeSplice(comparisonArray, -comparisonArray.length - 1, 0);
           expect(array).to.deep.equal(comparisonArray);
         });
 
         it('returns empty array', () => {
-          expect(splice(array, -1 - array.length, 0))
-            .to.deep.equal(nativeSplice(comparisonArray, -1 - comparisonArray.length, 0));
+          expect(splice(array, -array.length - 1, 0))
+            .to.deep.equal(nativeSplice(comparisonArray, -comparisonArray.length - 1, 0));
         });
       });
 
@@ -296,14 +309,14 @@ describe('Fast Splice', () => {
 
       describe('with very negative start index', () => {
         it('removes count elements', () => {
-          splice(array, -1 - array.length, 2);
-          nativeSplice(comparisonArray, -1 - comparisonArray.length, 2);
+          splice(array, -array.length - 1, 2);
+          nativeSplice(comparisonArray, -comparisonArray.length - 1, 2);
           expect(array).to.deep.equal(comparisonArray);
         });
 
         it('returns removed elements', () => {
-          expect(splice(array, -1 - array.length, 2))
-            .to.deep.equal(nativeSplice(comparisonArray, -1 - comparisonArray.length, 2));
+          expect(splice(array, -array.length - 1, 2))
+            .to.deep.equal(nativeSplice(comparisonArray, -comparisonArray.length - 1, 2));
         });
       });
 
@@ -376,14 +389,14 @@ describe('Fast Splice', () => {
 
       describe('with very negative start index', () => {
         it('removes everything', () => {
-          splice(array, -1 - array.length, array.length);
-          nativeSplice(comparisonArray, -1 - comparisonArray.length, comparisonArray.length);
+          splice(array, -array.length - 1, array.length);
+          nativeSplice(comparisonArray, -comparisonArray.length - 1, comparisonArray.length);
           expect(array).to.deep.equal(comparisonArray);
         });
 
         it('returns everything', () => {
-          expect(splice(array, -1 - array.length, array.length))
-            .to.deep.equal(nativeSplice(comparisonArray, -1 - comparisonArray.length, comparisonArray.length));
+          expect(splice(array, -array.length - 1, array.length))
+            .to.deep.equal(nativeSplice(comparisonArray, -comparisonArray.length - 1, comparisonArray.length));
         });
       });
 
@@ -456,14 +469,14 @@ describe('Fast Splice', () => {
 
       describe('with very negative start index', () => {
         it('removes nothing', () => {
-          splice(array, -1 - array.length, -1);
-          nativeSplice(comparisonArray, -1 - comparisonArray.length, -1);
+          splice(array, -array.length - 1, -1);
+          nativeSplice(comparisonArray, -comparisonArray.length - 1, -1);
           expect(array).to.deep.equal(comparisonArray);
         });
 
         it('returns empty array', () => {
-          expect(splice(array, -1 - array.length, -1))
-            .to.deep.equal(nativeSplice(comparisonArray, -1 - comparisonArray.length, -1));
+          expect(splice(array, -array.length - 1, -1))
+            .to.deep.equal(nativeSplice(comparisonArray, -comparisonArray.length - 1, -1));
         });
       });
 
@@ -536,14 +549,14 @@ describe('Fast Splice', () => {
 
       describe('with very negative start index', () => {
         it('removes nothing', () => {
-          splice(array, -1 - array.length, null);
-          nativeSplice(comparisonArray, -1 - comparisonArray.length, null);
+          splice(array, -array.length - 1, null);
+          nativeSplice(comparisonArray, -comparisonArray.length - 1, null);
           expect(array).to.deep.equal(comparisonArray);
         });
 
         it('returns empty array', () => {
-          expect(splice(array, -1 - array.length, null))
-            .to.deep.equal(nativeSplice(comparisonArray, -1 - comparisonArray.length, null));
+          expect(splice(array, -array.length - 1, null))
+            .to.deep.equal(nativeSplice(comparisonArray, -comparisonArray.length - 1, null));
         });
       });
 
@@ -968,7 +981,7 @@ describe('Fast Splice', () => {
     describe('with small insert count', () => {
       describe('with 0 delete count', () => {
         describe('with 0 start index', () => {
-          it.only('inserts elements', () => {
+          it('inserts elements', () => {
             splice(array, 0, 0, [6, 7]);
             nativeSplice(comparisonArray, 0, 0, [6, 7]);
             expect(array).to.deep.equal(comparisonArray);

@@ -2,7 +2,7 @@ import toInteger from 'lodash.tointeger';
 
 const empty = [];
 
-function fastSplice(array, start, deleteCount, inserts, argsLength) {
+function multiSplice(array, start, deleteCount, inserts, argsLength) {
   if (!Array.isArray(array)) {
     throw new TypeError('Need an array to splice.')
   }
@@ -38,22 +38,24 @@ function fastSplice(array, start, deleteCount, inserts, argsLength) {
   const need = Math.max(edge - length, 0);
 
   // Append inserts that'll end up on the end of the array to the array.
-  for (i = length - deleteCount; i < edge; i++) {
+  for (i = length; i < edge; i++) {
     array[i] = inserts[i - start];
   }
   if (insertCount) {
     for (i = length - insertCount + need; i < length - deleteCount; i++) {
-      array[i + insertCount] = array[i];
+      array[i + insertCount] = array[i + deleteCount];
     }
     for (i = length - 1 - deleteCount; i >= edge; i--) {
       array[i] = array[i - insertCount];
     }
   }
-  for (i = start; i < length - deleteCount; i++) {
-    array[i] = array[i + deleteCount];
+  if (deleteCount) {
+    for (i = start; i < length - insertCount; i++) {
+      array[i + insertCount] = array[i + deleteCount];
+    }
   }
-  for (i = deleteCount; i < insertCount; i++) {
-    array[i + start] = inserts[i];
+  for (i = need; i < insertCount; i++) {
+    array[i + start - need] = inserts[i - need];
   }
 
   if (deleteCount) {
@@ -64,5 +66,5 @@ function fastSplice(array, start, deleteCount, inserts, argsLength) {
 }
 
 export default function(array, start, deleteCount, inserts = empty) {
-  return fastSplice(array, start, deleteCount, inserts, arguments.length);
+  return multiSplice(array, start, deleteCount, inserts, arguments.length);
 }
