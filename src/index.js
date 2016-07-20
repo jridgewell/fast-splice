@@ -4,16 +4,16 @@ const empty = [];
 
 function multiSplice(array, start, deleteCount, inserts, argsLength) {
   if (!Array.isArray(array)) {
-    throw new TypeError('Need an array to splice.')
+    throw new TypeError('Need an array to splice.');
   }
   if (!Array.isArray(inserts)) {
-    throw new TypeError('Inserts array much be an array.')
+    throw new TypeError('Inserts array much be an array.');
   }
-  if (argsLength == 1) {
+  if (argsLength === 1) {
     return [];
   }
 
-  let length = array.length;
+  const length = array.length;
   start = toInteger(start);
   if (start < 0) {
     start = Math.max(length + start, 0);
@@ -21,7 +21,7 @@ function multiSplice(array, start, deleteCount, inserts, argsLength) {
     start = Math.min(start, length);
   }
 
-  if (argsLength == 2) {
+  if (argsLength === 2) {
     deleteCount = length - start;
   } else {
     deleteCount = Math.min(Math.max(toInteger(deleteCount), 0), length - start);
@@ -37,7 +37,6 @@ function multiSplice(array, start, deleteCount, inserts, argsLength) {
   const edge = start + insertCount;
   const need = Math.max(edge - length, 0);
 
-  // Append inserts that'll end up on the end of the array to the array.
   for (i = length; i < edge; i++) {
     array[i] = inserts[i - start];
   }

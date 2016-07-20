@@ -15,9 +15,9 @@ describe('Fast Splice', () => {
     gets = sets = null;
   }
 
-  const proxiedArray = (function() {
+  const proxiedArray = (function proxiedArray() {
     const proxyHandler = {
-      get: function(target, property) {
+      get: function get(target, property) {
         // Allow two gets, one for the splice and one for the deep equals.
         if (gets) {
           if (gets[property]) {
@@ -28,7 +28,7 @@ describe('Fast Splice', () => {
         return target[property];
       },
 
-      set: function(target, property, value) {
+      set: function set(target, property, value) {
         // Allow two sets, one for the splice and one for the deep equals.
         if (sets) {
           if (sets[property]) {
@@ -38,7 +38,7 @@ describe('Fast Splice', () => {
         }
         target[property] = value;
         return true;
-      }
+      },
     };
 
     return function proxiedArray(array) {
@@ -47,7 +47,7 @@ describe('Fast Splice', () => {
       }
 
       return new Proxy(array, proxyHandler);
-    }
+    };
   }());
 
   beforeEach(() => {
@@ -58,7 +58,7 @@ describe('Fast Splice', () => {
 
   function splice(...args) {
     enableProxy();
-    let ret = multiSplice.apply(this, args);
+    const ret = multiSplice.apply(this, args);
     disableProxy();
     return ret;
   }
