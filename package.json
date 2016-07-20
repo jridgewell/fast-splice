@@ -1,5 +1,5 @@
 {
-  "name": "fast-splice",
+  "name": "multi-splice",
   "author": "Justin Ridgewell",
   "version": "0.1.0",
   "description": "Quickly splice multiple items into an array",

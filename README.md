@@ -1,4 +1,4 @@
-# fast-splice [![Build Status](https://travis-ci.org/jridgewell/fast-splice.svg)](https://travis-ci.org/jridgewell/fast-splice) [![npm version](https://badge.fury.io/js/fast-splice.svg)](http://badge.fury.io/js/fast-splice)
+# multi-splice [![Build Status](https://travis-ci.org/jridgewell/multi-splice.svg)](https://travis-ci.org/jridgewell/multi-splice) [![npm version](https://badge.fury.io/js/multi-splice.svg)](http://badge.fury.io/js/multi-splice)
 
 Description
 
@@ -6,7 +6,7 @@ Description
 ## Installation
 
 ```
-npm install --save fast-splice
+npm install --save multi-splice
 ```
 
 ## Usage
